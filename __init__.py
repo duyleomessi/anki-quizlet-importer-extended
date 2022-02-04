@@ -70,10 +70,10 @@ def addCustomModel(name, col):
 
     # create custom model for imported deck
     mm = col.models
-    existing = mm.byName("Basic Quizlet Extended")
+    existing = mm.by_name("Test Extened 1")
     if existing:
         return existing
-    m = mm.new("Basic Quizlet Extended")
+    m = mm.new("Test Extended 1")
 
     # add fields
     mm.addField(m, mm.newField("FrontText"))
@@ -82,22 +82,23 @@ def addCustomModel(name, col):
     mm.addField(m, mm.newField("BackAudio"))
     mm.addField(m, mm.newField("Image"))
     mm.addField(m, mm.newField("Add Reverse"))
+    mm.addField(m, mm.newField("BackTerm"))
 
     # add cards
     t = mm.newTemplate("Normal")
 
 
     # front
-    t['qfmt'] = "{{FrontText}}\n<br><br>\n{{FrontAudio}}"
-    t['afmt'] = "{{FrontText}}\n<hr id=answer>\n{{BackText}}\n<br><br>\n{{Image}}\n<br><br>\n{{BackAudio}}"
+    t['qfmt'] = "{{FrontText}}\n<br><br>\n{{FrontAudio}}\n<br><br>\n{{Image}}"
+    t['afmt'] = "{{BackTerm}}\n<br><br>\n{{FrontAudio}}\n<hr id=answer>\n{{BackText}}\n<br><br>\n{{Image}}"
     mm.addTemplate(m, t)
 
 
     # back
-    t = mm.newTemplate("Reverse")
-    t['qfmt'] = "{{#Add Reverse}}{{BackText}}\n<br><br>\n{{BackAudio}}{{/Add Reverse}}"
-    t['afmt'] = "{{BackText}}\n<hr id=answer>\n{{FrontText}}\n<br><br>\n{{FrontAudio}}\n{{Image}}"
-    mm.addTemplate(m, t)
+    # t = mm.newTemplate("Reverse")
+    # t['qfmt'] = "{{#Add Reverse}}{{BackText}}\n<br><br>\n{{BackAudio}}{{/Add Reverse}}"
+    # t['afmt'] = "{{BackText}}\n<hr id=answer>\n{{FrontText}}\n<br><br>\n{{FrontAudio}}\n{{Image}}"
+    # mm.addTemplate(m, t)
 
     mm.add(m)
     return m
@@ -319,7 +320,7 @@ class QuizletWindow(QWidget):
         mw.col.decks.save(deck)
 
         # assign new deck to custom model
-        mw.col.models.setCurrent(model)
+        mw.col.models.set_current(model)
         model["did"] = deck["id"]
         mw.col.models.save(model)
 
@@ -335,10 +336,12 @@ class QuizletWindow(QWidget):
 
             if not stopProcess and startProcess:
                 note = mw.col.newNote()
-                note["FrontText"] = item["term"]
+                note["FrontText"] = item["termWithoutVowels"]
                 note["BackText"] = item["definition"]
+                note["BackTerm"] = item["term"]
                 note["FrontText"] = ankify(note["FrontText"])
                 note["BackText"] = ankify(note["BackText"])
+                note["BackTerm"] = ankify(note["BackTerm"])
 
                 if item.get('termAudio') and downloadAudio:
                     file_name = self.fileDownloader(self.getAudioUrl(item['termAudio']), str(item["id"]) + "-front.mp3")
@@ -395,6 +398,12 @@ def mapItems(jsonData):
         definition_id = next((x for x in studiableCardSides if (x["studiableItemId"] == studiableItem["id"] and x["label"] == 'definition') ), None)
 
         term = next((x for x in studiableMediaConnections if (x["connectionModelId"] == term_id["id"]) ), None)
+        # term ex: {'id': 43, 'timestamp': 1643456342, 'lastModified': 1643456342, 'connectionModelId': 5169866631905433, 'connectionType': 5, 'mediaType': 1, 'text': {'plainText': 'megalomania', 'languageCode': 'en', 'ttsUrl': '/tts/en.mp3?v=14&b=bWVnYWxvbWFuaWE&s=EhIPihkQ', 'ttsSlowUrl': '/tts/en.mp3?v=14&b=bWVnYWxvbWFuaWE&s=EhIPihkQ&speed=70', 'richText': None}}
+        termText = parseTextItem(term)
+
+        termWithoutVowels = None
+        if term:
+             termWithoutVowels = removeVowels(termText)
         definition = next((x for x in studiableMediaConnections if (x["connectionModelId"] == definition_id["id"]) ), None)
 
         image = next((x for x in studiableMediaConnections if (x["connectionModelId"] == definition_id["id"] and x["mediaType"] == 2)), None)
@@ -406,7 +415,8 @@ def mapItems(jsonData):
 
         result.append({
             "id": studiableItem["id"],
-            "term": parseTextItem(term),
+            "term": termText,
+            "termWithoutVowels": termWithoutVowels,
             "termAudio": parseAudioUrlItem(term),
             "definition": parseTextItem(definition),
             "definitionAudio": definition_audio,
@@ -414,6 +424,21 @@ def mapItems(jsonData):
         })
 
     return result
+
+def removeVowels(text):
+    """
+    Remove the vowels (a, e, i, o, u, y) and replace by _
+    @params text input string
+    Example: params -> p_r_ms
+    """
+    vowels = {'a': 'a', 'e': 'e', 'i': 'i', 'o': 'o', 'u': 'u', 'y': 'y'}
+    removedVowelsText = ''
+    for i, value in enumerate(text):
+        if value in vowels:
+            removedVowelsText += "_"
+        else:
+            removedVowelsText += value
+    return removedVowelsText
 
 class QuizletDownloader(QThread):
 
