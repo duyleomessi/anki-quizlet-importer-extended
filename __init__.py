@@ -65,15 +65,17 @@ headers = {
   "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36"
 }
 
+modelName = "Test Extened 11"
+
 # add custom model if needed
 def addCustomModel(name, col):
 
     # create custom model for imported deck
     mm = col.models
-    existing = mm.by_name("Test Extened 1")
+    existing = mm.by_name(modelName)
     if existing:
         return existing
-    m = mm.new("Test Extended 1")
+    m = mm.new(modelName)
 
     # add fields
     mm.addField(m, mm.newField("FrontText"))
@@ -89,8 +91,8 @@ def addCustomModel(name, col):
 
 
     # front
-    t['qfmt'] = "{{FrontText}}\n<br><br>\n{{FrontAudio}}\n<br><br>\n{{Image}}"
-    t['afmt'] = "{{BackTerm}}\n<br><br>\n{{FrontAudio}}\n<hr id=answer>\n{{BackText}}\n<br><br>\n{{Image}}"
+    t['qfmt'] = "{{Image}}\n<br>\n{{FrontText}}\n<br>\n{{FrontAudio}}"
+    t['afmt'] = "{{Image}}\n<br>\n{{FrontText}}\n<br>\n{{FrontAudio}}\n<hr id=answer>\n{{BackTerm}}\n<br>{{BackText}}"
     mm.addTemplate(m, t)
 
 
@@ -336,9 +338,9 @@ class QuizletWindow(QWidget):
 
             if not stopProcess and startProcess:
                 note = mw.col.newNote()
-                note["FrontText"] = item["termWithoutVowels"]
+                note["FrontText"] = colorText(item["termWithoutVowels"])
                 note["BackText"] = item["definition"]
-                note["BackTerm"] = item["term"]
+                note["BackTerm"] = colorText(item["term"])
                 note["FrontText"] = ankify(note["FrontText"])
                 note["BackText"] = ankify(note["BackText"])
                 note["BackTerm"] = ankify(note["BackTerm"])
@@ -439,6 +441,19 @@ def removeVowels(text):
         else:
             removedVowelsText += value
     return removedVowelsText
+
+def colorText(text):
+    newText = '<p style="font-size: 50px;">'
+    blueColorText = {'a': 'a', 'e': 'e', 'i': 'i', 'o': 'o', 'u': 'u', 'y': 'y', '_': '_'}
+    for i, value in enumerate(text):
+        if value in blueColorText:
+            newText += f'<span style="color: blue">{value}</span>'
+        else:
+            newText += f'<span style="color: red">{value}</span>'
+    newText += '</p>'
+    return newText
+
+
 
 class QuizletDownloader(QThread):
 
