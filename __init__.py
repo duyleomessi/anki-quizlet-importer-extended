@@ -65,7 +65,7 @@ headers = {
   "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36"
 }
 
-modelName = "Test Extened 11"
+modelName = "Test Extened 12"
 
 # add custom model if needed
 def addCustomModel(name, col):
@@ -338,9 +338,9 @@ class QuizletWindow(QWidget):
 
             if not stopProcess and startProcess:
                 note = mw.col.newNote()
-                note["FrontText"] = colorText(item["termWithoutVowels"])
+                note["FrontText"] = colorText(item["termWithoutVowels"], 50)
                 note["BackText"] = item["definition"]
-                note["BackTerm"] = colorText(item["term"])
+                note["BackTerm"] = colorText(item["term"], 50)
                 note["FrontText"] = ankify(note["FrontText"])
                 note["BackText"] = ankify(note["BackText"])
                 note["BackTerm"] = ankify(note["BackTerm"])
@@ -442,8 +442,16 @@ def removeVowels(text):
             removedVowelsText += value
     return removedVowelsText
 
-def colorText(text):
-    newText = '<p style="font-size: 50px;">'
+def colorText(text, fontSize):
+    """
+    Return html string with style
+    The vowels (a, e, i, o, u, y) and _ turn to red
+    And others turn to blue
+    @params text input string
+    @fontSize font size of output
+    Example: hello -> <p style="font-size: 50px;"><span style="color: blue">h</span><span style="color: red">e</span><span style="color: blue">ll</span><span style="color: red">e</span></p>
+    """
+    newText = f'<p style="font-size: {fontSize}px;">'
     blueColorText = {'a': 'a', 'e': 'e', 'i': 'i', 'o': 'o', 'u': 'u', 'y': 'y', '_': '_'}
     for i, value in enumerate(text):
         if value in blueColorText:
