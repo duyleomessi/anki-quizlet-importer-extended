@@ -65,3 +65,27 @@ Supports start and stop phrases. It allows you to download a part of the quizlet
 * FrontAudio - `[sound:"quizlet-CARD_ID-front.mp3"]`
 * BackAudio - `[sound:"quizlet-CARD_ID-back.mp3"]`
 * Image - `<img src="file_name">`
+
+# Install Guide
+1. Create virtual environment 
+
+``` shell
+virtualenv venv
+```
+
+2. Activate that virtual environment
+
+``` shell
+source venv/bin/activate
+```
+
+3. Install requirement package 
+
+``` shell
+pip3 install -r requirements.txt
+```
+
+# Run test 
+``` shell
+python3 -m unittest test
+```

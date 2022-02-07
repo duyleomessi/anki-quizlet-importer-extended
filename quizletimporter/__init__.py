@@ -489,12 +489,36 @@ def colorText(text, fontSize):
     @fontSize font size of output
     Example: hello -> <p style="font-size: 50px;"><span style="color: blue">h</span><span style="color: red">e</span><span style="color: blue">ll</span><span style="color: red">e</span></p>
     """
+
+    text = text.strip()
+
+    flagVowels = False
+    flagConsonant = False
+
     newText = f'<p style="font-size: {fontSize}px;">'
-    blueColorText = {'a': 'a', 'e': 'e', 'i': 'i', 'o': 'o', 'u': 'u', 'y': 'y', '_': '_'}
+    vowels = {'a': 'a', 'e': 'e', 'i': 'i', 'o': 'o', 'u': 'u', 'y': 'y', '_': '_'}
     for i, value in enumerate(text):
-        if value in blueColorText:
-            newText += f'<span style="color: blue">{value}</span>'
+        if value in vowels:
+            if flagConsonant == True:
+                newText += '</span>'
+            if flagVowels == False:
+                newText += f'<span style="color: blue">{value}'
+            elif flagVowels == True:
+                newText += value
+            flagConsonant = False
+            flagVowels = True
         else:
-            newText += f'<span style="color: red">{value}</span>'
+            if flagVowels == True:
+                newText += '</span>'
+            if flagConsonant == False:
+                newText += f'<span style="color: red">{value}'
+            elif flagConsonant == True:
+                newText += value
+            flagConsonant = True
+            flagVowels = False
+
+    if len(text) > 0:
+        newText += '</span>'
+
     newText += '</p>'
     return newText
