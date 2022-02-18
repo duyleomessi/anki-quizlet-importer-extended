@@ -232,13 +232,14 @@ class QuizletWindow(QWidget):
                 note["BackText"] = ankify(note["BackText"])
                 note["BackTerm"] = ankify(note["BackTerm"])
 
+                soundFileName = None
                 if item.get('termAudio') and downloadAudio:
-                    file_name = self.fileDownloader(self.getAudioUrl(item['termAudio']), str(item["id"]) + "-front.mp3")
-                    note["FrontAudio"] = "[sound:" + file_name +"]"
+                    soundFileName = self.fileDownloader(self.getAudioUrl(item['termAudio']), str(item["id"]) + "-front.mp3")
+                    note["FrontAudio"] = "[sound:" + soundFileName +"]"
 
                 if item.get('definitionAudio') and downloadAudio:
-                    file_name = self.fileDownloader(self.getAudioUrl(item["definitionAudio"]), str(item["id"]) + "-back.mp3")
-                    note["BackAudio"] = "[sound:" + file_name +"]"
+                    # file_name = self.fileDownloader(self.getAudioUrl(item["definitionAudio"]), str(item["id"]) + "-back.mp3")
+                    note["BackAudio"] = "[sound:" + soundFileName +"]"
 
                 if item.get('imageUrl'):
                     file_name = self.fileDownloader(item["imageUrl"])
